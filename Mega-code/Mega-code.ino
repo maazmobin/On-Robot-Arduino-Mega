@@ -7,7 +7,7 @@
 // RF24 radio(CE,CSN);
 RF24 radio(49,53);
 
-const uint64_t pipes[2] = { 0xDEDEDEDEE8LL, 0xDEDEDEDEE4LL };
+const uint64_t pipes[2] = { 0xDEDEDEDEE4LL, 0xDEDEDEDEE8LL };
 
 boolean stringComplete = false;
 static int dataBufferIndex = 0;
