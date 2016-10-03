@@ -9,16 +9,14 @@ RF24 radio(49,53);
 
 const uint64_t pipes[2] = { 0xDEDEDEDEE8LL, 0xDEDEDEDEE4LL };
 
-boolean stringComplete = false;  // whether the string is complete
+boolean stringComplete = false;
 static int dataBufferIndex = 0;
 boolean stringOverflow = false;
 char charOverflow = 0;
 
-char SendPayload[31] = "";
-char RecvPayload[31] = "";
-char serialBuffer[31] = "";
-
-String inputString = "";         // a string to hold incoming data
+String SendPayload = "";
+String RecvPayload = "";
+char serialBuffer[50] = "";
 
 
 void setup(void) {
@@ -44,9 +42,11 @@ void setup(void) {
 
   Serial.println();
   Serial.println("RF Chat V01.0");    
+  
   delay(500);
-    inputString.reserve(200);
-
+  
+  SendPayload.reserve(100);
+  RecvPayload.reserve(100);
 }
 
 void loop(void) {
@@ -55,76 +55,59 @@ void loop(void) {
 } // end loop()
 
 void serialEvent1() {
-  while (Serial1.available() > 0 ) {
-      char incomingByte = Serial1.read();
-      
-      if (stringOverflow) {
-         serialBuffer[dataBufferIndex++] = charOverflow;  // Place saved overflow byte into buffer
-         serialBuffer[dataBufferIndex++] = incomingByte;  // saved next byte into next buffer
-         stringOverflow = false;                          // turn overflow flag off
-      } else if (dataBufferIndex > 31) {
-         stringComplete = true;        // Send this buffer out to radio
-         stringOverflow = true;        // trigger the overflow flag
-         charOverflow = incomingByte;  // Saved the overflow byte for next loop
-         dataBufferIndex = 0;          // reset the bufferindex
-         break; 
-      } 
-      else if(incomingByte=='\n'){
-          serialBuffer[dataBufferIndex] = 0; 
-          stringComplete = true;
-      } else {
-          serialBuffer[dataBufferIndex++] = incomingByte;
-          serialBuffer[dataBufferIndex] = 0; 
-      }          
-  } // end while()
+  while (Serial1.available()) {
+    // get the new byte:
+    char inChar = (char)Serial1.read();
+    // add it to the inputString:
+    SendPayload += inChar;
+    // if the incoming character is a newline, set a flag
+    // so the main loop can do something about it:
+    if (inChar == '\n') {
+      stringComplete = true;
+    }
+  }
 } // end serialEvent()
 
 void nRF_receive(void) {
   int len = 0;
   if ( radio.available() ) {
-        len = radio.getDynamicPayloadSize();
-        radio.read(&RecvPayload,len);
-        delay(5);
-  
-    RecvPayload[len] = 0; // null terminate string
+    len = radio.getDynamicPayloadSize();
+    radio.read(&serialBuffer,len);
+    delay(5);
+    serialBuffer[len] = 0; // null terminate string
     
     Serial.print("R:");
-    Serial.print(RecvPayload);
+    Serial.print(serialBuffer);
     Serial.println();
-    inputString = String(RecvPayload);
-    if (inputString.startsWith("MOTOR"))
+    RecvPayload = String(serialBuffer);
+    if (RecvPayload.startsWith("MOTOR"))
       {
-        inputString= inputString.substring(6);
-      Serial1.println(inputString);
+        RecvPayload= RecvPayload.substring(6);
+      Serial1.println(RecvPayload);
       }
     // clear the string:
-    inputString = "";
-    RecvPayload[0] = 0;  // Clear the buffers
+    RecvPayload = "";
+    serialBuffer[0] = 0;  // Clear the buffers
   }  
 
 } // end nRF_receive()
 
 void serial_receive(void){
   if (stringComplete) { 
-        strcat(SendPayload,serialBuffer);      
         // swap TX & Rx addr for writing
         radio.openWritingPipe(pipes[1]);
         radio.openReadingPipe(0,pipes[0]);  
         radio.stopListening();
-        radio.write(&SendPayload,strlen(SendPayload));
+        radio.write(SendPayload.c_str(),SendPayload.length());
         
         Serial.print("S:");  
         Serial.print(SendPayload);          
         Serial.println();
         stringComplete = false;
-       // Serial.println();
-        // restore TX & Rx addr for reading  
              
         radio.openWritingPipe(pipes[0]);
         radio.openReadingPipe(1,pipes[1]);
-         
         radio.startListening();  
-        SendPayload[0] = 0;
-        dataBufferIndex = 0;
-  } // endif
-} // end serial_receive()
+        SendPayload = "";
+  }
+}
