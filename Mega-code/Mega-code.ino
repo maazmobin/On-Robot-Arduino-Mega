@@ -7,7 +7,7 @@
 // RF24 radio(CE,CSN);
 RF24 radio(49,53);
 
-const uint64_t pipes[2] = { 0xDEDEDEDEE4LL, 0xDEDEDEDEE8LL };
+const uint64_t pipes[2] = { 0xDEDEDEDEE8LL, 0xDEDEDEDEE4LL };
 
 boolean stringComplete = false;
 static int dataBufferIndex = 0;
@@ -24,14 +24,17 @@ void setup(void) {
   Serial.begin(115200);
   printf_begin();
   radio.begin();
-  
+  radio.setAutoAck(1);                    // Ensure autoACK is enabled
+  radio.enableAckPayload();               // Allow optional ack payloads
+
+ // radio.setAutoAck(1);                    // Ensure autoACK is enabled
   radio.setDataRate(RF24_250KBPS);
   //radio.setDataRate(RF24_1MBPS);
   radio.setPALevel(RF24_PA_MAX);
   radio.setChannel(70);
   
   radio.enableDynamicPayloads();
-  radio.setRetries(15,15);
+  radio.setRetries(0,15);
   radio.setCRCLength(RF24_CRC_16);
 
   radio.openWritingPipe(pipes[0]);
@@ -45,8 +48,8 @@ void setup(void) {
   
   delay(500);
   
-  SendPayload.reserve(100);
-  RecvPayload.reserve(100);
+  ///SendPayload.reserve(100);
+ /// RecvPayload.reserve(100);
 }
 
 void loop(void) {
@@ -73,7 +76,7 @@ void nRF_receive(void) {
   if ( radio.available() ) {
     len = radio.getDynamicPayloadSize();
     radio.read(&serialBuffer,len);
-    delay(5);
+   // delay(5);
     serialBuffer[len] = 0; // null terminate string
     
     Serial.print("R:");
@@ -98,16 +101,26 @@ void serial_receive(void){
         radio.openWritingPipe(pipes[1]);
         radio.openReadingPipe(0,pipes[0]);  
         radio.stopListening();
-        radio.write(SendPayload.c_str(),SendPayload.length());
-        
-        Serial.print("S:");  
-        Serial.print(SendPayload);          
+        //bool a = radio.write(SendPayload.c_str(),SendPayload.length());
+        char SendPayload1[31] = "maaz";
+         // Serial.println("sss");
+
+        bool a = radio.write(&SendPayload,sizeof(SendPayload));
+       // radio.write(&SendPayload,strlen(SendPayload));
+        if(a)
+        {
+          Serial.print("S:");
+          Serial.print(SendPayload1);          
         Serial.println();
+        
+        }
         stringComplete = false;
+        SendPayload = "";
+
              
         radio.openWritingPipe(pipes[0]);
         radio.openReadingPipe(1,pipes[1]);
         radio.startListening();  
-        SendPayload = "";
+ 
   }
 }
