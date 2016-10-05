@@ -9,25 +9,24 @@ RF24 radio(49,53);
 
 const uint64_t pipes[2] = { 0xDEDEDEDEE8LL, 0xDEDEDEDEE4LL };
 
-boolean stringComplete = false;
+boolean stringComplete = false;  // whether the string is complete
 static int dataBufferIndex = 0;
 boolean stringOverflow = false;
 char charOverflow = 0;
 
 String SendPayload = "";
-String RecvPayload = "";
-char serialBuffer[50] = "";
-
+char RecvPayload[31] = "";
+char serialBuffer[31] = "";
 
 void setup(void) {
-  Serial1.begin(115200);
+ 
   Serial.begin(115200);
-  printf_begin();
+  Serial1.begin(115200);
+//  printf_begin();
   radio.begin();
-  radio.setAutoAck(1);                    // Ensure autoACK is enabled
+    radio.setAutoAck(1);                    // Ensure autoACK is enabled
   radio.enableAckPayload();               // Allow optional ack payloads
 
- // radio.setAutoAck(1);                    // Ensure autoACK is enabled
   radio.setDataRate(RF24_250KBPS);
   //radio.setDataRate(RF24_1MBPS);
   radio.setPALevel(RF24_PA_MAX);
@@ -45,16 +44,14 @@ void setup(void) {
 
   Serial.println();
   Serial.println("RF Chat V01.0");    
-  
   delay(500);
-  
-  ///SendPayload.reserve(100);
- /// RecvPayload.reserve(100);
 }
 
 void loop(void) {
+  
   nRF_receive();
   serial_receive();
+  
 } // end loop()
 
 void serialEvent1() {
@@ -69,58 +66,52 @@ void serialEvent1() {
       stringComplete = true;
     }
   }
-} // end serialEvent()
-
+}
 void nRF_receive(void) {
   int len = 0;
   if ( radio.available() ) {
-    len = radio.getDynamicPayloadSize();
-    radio.read(&serialBuffer,len);
-   // delay(5);
-    serialBuffer[len] = 0; // null terminate string
+        len = radio.getDynamicPayloadSize();
+        radio.read(&RecvPayload,len);
+        //delay(5);
+  
+    RecvPayload[len] = 0; // null terminate string
     
-    Serial.print("R:");
-    Serial.print(serialBuffer);
+ //   Serial.print("R:");
+  Serial.print(RecvPayload);
     Serial.println();
-    RecvPayload = String(serialBuffer);
-    if (RecvPayload.startsWith("MOTOR"))
+    String a=String(RecvPayload);
+     if (a.startsWith("MOTOR"))
       {
-        RecvPayload= RecvPayload.substring(6);
-      Serial1.println(RecvPayload);
+       a= a.substring(6);
+      Serial1.println(a);
       }
-    // clear the string:
-    RecvPayload = "";
-    serialBuffer[0] = 0;  // Clear the buffers
+    RecvPayload[0] = 0;  // Clear the buffers
   }  
 
 } // end nRF_receive()
 
 void serial_receive(void){
+  
   if (stringComplete) { 
+       // strcat(SendPayload,serialBuffer);      
         // swap TX & Rx addr for writing
         radio.openWritingPipe(pipes[1]);
         radio.openReadingPipe(0,pipes[0]);  
         radio.stopListening();
-        //bool a = radio.write(SendPayload.c_str(),SendPayload.length());
-        char SendPayload1[31] = "maaz";
-         // Serial.println("sss");
-
-        bool a = radio.write(&SendPayload,sizeof(SendPayload));
-       // radio.write(&SendPayload,strlen(SendPayload));
-        if(a)
-        {
-          Serial.print("S:");
-          Serial.print(SendPayload1);          
-        Serial.println();
-        
-        }
+        char c[31]="";
+      SendPayload.toCharArray(c,SendPayload.length());
+        delay(2); //Delay is necessary, else transmission stops
+        radio.write(c,sizeof(c));  
+        Serial.println(c);          
         stringComplete = false;
-        SendPayload = "";
-
+       // Serial.println();
+        // restore TX & Rx addr for reading  
              
         radio.openWritingPipe(pipes[0]);
         radio.openReadingPipe(1,pipes[1]);
+         
         radio.startListening();  
- 
-  }
-}
+        SendPayload="";
+        dataBufferIndex = 0;
+  } // endif
+} // end serial_receive()
