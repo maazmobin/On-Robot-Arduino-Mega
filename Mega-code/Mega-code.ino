@@ -22,12 +22,10 @@ void setup(void) {
  
   Serial.begin(115200);
   Serial1.begin(115200);
-//  printf_begin();
+  printf_begin();
   radio.begin();
-    radio.setAutoAck(1);                    // Ensure autoACK is enabled
-  radio.enableAckPayload();               // Allow optional ack payloads
-
-  radio.setDataRate(RF24_250KBPS);
+  
+  radio.setDataRate(RF24_1MBPS);
   //radio.setDataRate(RF24_1MBPS);
   radio.setPALevel(RF24_PA_MAX);
   radio.setChannel(70);
