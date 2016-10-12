@@ -1,3 +1,5 @@
+#include <quaternionFilters.h>
+#include <MPU9250.h>
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <printf.h>
@@ -17,8 +19,27 @@ char charOverflow = 0;
 String SendPayload = "";
 char RecvPayload[31] = "";
 char serialBuffer[31] = "";
+String IMU_data="";
+
+                                    //BROADCAST IMU DATA After 50ms
+unsigned long prevIMUtime = 0;
+int IMUinterval = 100; //100ms
+
+                                    //Declearing IMU
+
+#include <MPU9250.h>   //https://github.com/sparkfun/SparkFun_MPU-9250_Breakout_Arduino_Library
+#define IMU_SerialDebug false  // Set to true to get Serial output for debugging
+MPU9250 myIMU;
+int dataTurn=0;
 
 void setup(void) {
+
+                            //FOR IMU
+    Wire.begin();
+  // TWBR = 12;  // 400 kbit/sec I2C speed
+    myIMU.initMPU9250();
+    myIMU.initAK8963(myIMU.magCalibration);
+                            //END IMU
  
   Serial.begin(115200);
   Serial1.begin(115200);
@@ -49,6 +70,7 @@ void loop(void) {
   
   nRF_receive();
   serial_receive();
+  broadcastIMU();
   
 } // end loop()
 
@@ -112,4 +134,95 @@ void serial_receive(void){
         SendPayload="";
         dataBufferIndex = 0;
   } // endif
-} // end serial_receive()
+}// end serial_receive()
+void broadcastIMU(void)
+{
+  unsigned long currentIMUmillis = millis();
+  if (currentIMUmillis - prevIMUtime >= IMUinterval) {
+    prevIMUtime = currentIMUmillis;
+    IMU_data="";
+  if(dataTurn==0)
+  {
+    dataTurn++;
+     myIMU.readAccelData(myIMU.accelCount);  // Read the x/y/z adc values
+    myIMU.getAres();
+    // Now we'll calculate the accleration value into actual g's
+    // This depends on scale being set
+    myIMU.ax = (float)myIMU.accelCount[0]*myIMU.aRes; // - accelBias[0];
+    myIMU.ay = (float)myIMU.accelCount[1]*myIMU.aRes; // - accelBias[1];
+    myIMU.az = (float)myIMU.accelCount[2]*myIMU.aRes; // - accelBias[2];
+	IMU_data = "acc," + String(myIMU.ax*1000) +  "," + String(myIMU.ay*1000) + "," + String(myIMU.az*1000);
+	if (IMU_SerialDebug)
+	{
+  Serial.println(IMU_data);
+	}
+    }
+  else if(dataTurn==1)
+  {
+    dataTurn++;
+    myIMU.readGyroData(myIMU.gyroCount);  // Read the x/y/z adc values
+    myIMU.getGres();
+    // Calculate the gyro value into actual degrees per second
+    // This depends on scale being set
+    myIMU.gx = (float)myIMU.gyroCount[0]*myIMU.gRes;
+    myIMU.gy = (float)myIMU.gyroCount[1]*myIMU.gRes;
+    myIMU.gz = (float)myIMU.gyroCount[2]*myIMU.gRes;
+    IMU_data="gyro,"+ String(myIMU.gx)+","+String(myIMU.gy)+","+String(myIMU.gz);
+	if (IMU_SerialDebug)
+	{
+  Serial.println(IMU_data);
+	}
+    }
+  else if(dataTurn==2)
+  {
+    dataTurn++;
+     myIMU.readMagData(myIMU.magCount);  // Read the x/y/z adc values
+    myIMU.getMres();
+    // User environmental x-axis correction in milliGauss, should be
+    // automatically calculated
+    myIMU.magbias[0] = +470.;
+    // User environmental x-axis correction in milliGauss TODO axis??
+    myIMU.magbias[1] = +120.;
+    // User environmental x-axis correction in milliGauss
+    myIMU.magbias[2] = +125.;
+    
+    myIMU.mx = (float)myIMU.magCount[0]*myIMU.mRes*myIMU.magCalibration[0] -
+               myIMU.magbias[0];
+    myIMU.my = (float)myIMU.magCount[1]*myIMU.mRes*myIMU.magCalibration[1] -
+               myIMU.magbias[1];
+    myIMU.mz = (float)myIMU.magCount[2]*myIMU.mRes*myIMU.magCalibration[2] -
+               myIMU.magbias[2];
+    IMU_data="mag,"+ String(int(myIMU.mx))+","+String(int(myIMU.my))+","+String(int(myIMU.mz));
+	if (IMU_SerialDebug)
+	{
+		Serial.println(IMU_data);
+	}
+    }
+  else if(dataTurn==3)
+  {
+    dataTurn=0;
+    myIMU.tempCount = myIMU.readTempData();  // Read the adc values
+        myIMU.temperature = ((float) myIMU.tempCount) / 333.87 + 21.0;
+        IMU_data="temp,"+String(myIMU.temperature);
+		if (IMU_SerialDebug)
+		{
+			Serial.println(IMU_data);
+		}
+    }
+     radio.openWritingPipe(pipes[1]);
+        radio.openReadingPipe(0,pipes[0]);  
+        radio.stopListening();
+        char c[31]="";
+      IMU_data.toCharArray(c,IMU_data.length());
+        delay(2); //Delay is necessary, else transmission stops
+        radio.write(c,sizeof(c));  
+        Serial.println(c);          
+        stringComplete = false;  
+        radio.openWritingPipe(pipes[0]);
+        radio.openReadingPipe(1,pipes[1]);
+        radio.startListening(); 
+  }
+
+  
+}
+
