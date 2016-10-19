@@ -28,15 +28,15 @@
     <BootSegment>0</BootSegment>
     <AsfFrameworkConfig>
       <framework-data>
-  <options />
-  <configurations />
-  <files />
-  <documentation help="" />
-  <offline-documentation help="" />
-  <dependencies>
-    <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.28.1" />
-  </dependencies>
-</framework-data>
+        <options />
+        <configurations />
+        <files />
+        <documentation help="" />
+        <offline-documentation help="" />
+        <dependencies>
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.28.1" />
+        </dependencies>
+      </framework-data>
     </AsfFrameworkConfig>
     <preserveEEPROM>true</preserveEEPROM>
   </PropertyGroup>
@@ -129,8 +129,8 @@
     </ToolchainSettings>
     <VMSETTING_IncludePaths>C:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src;C:/Users/maazm/Documents/Arduino/libraries/RF24;C:/Users/maazm/Documents/Arduino/libraries/IMU_10DOF-master;C:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src;C:/Users/maazm/Documents/Arduino/libraries/IMU_10DOF-master/utility;C:/Users/maazm/Documents/Arduino/libraries/RF24/utility;C:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src/utility;C:/Program Files (x86)/Arduino/libraries;C:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries;C:/Users/maazm/Documents/Arduino/libraries;C:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino;C:/Program Files (x86)/Arduino/hardware/arduino/avr/variants/mega;../../../Mega-code;C:/Program Files (x86)/Arduino/hardware/tools/avr/avr/include/;C:/Program Files (x86)/Arduino/hardware/tools/avr//avr/include/avr/;C:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.8.1/include;C:/Users/maazm/Documents/Arduino/libraries/Sparkfun_MPU_9250-1.0.0/src;C:/Users/maazm/Documents/Arduino/libraries/Sparkfun_MPU_9250-1.0.0/src/utility;C:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility;C:/Program Files (x86)/Atmel/Studio/7.0/Extensions/hy4wzpgl.exe/Micro Platforms/default/debuggers;</VMSETTING_IncludePaths>
     <VisualMicroSettings>
-      <VisualMicroSettings xmlns="">
-        <arduino.upload.port>COM4</arduino.upload.port>
+      <VisualMicroSettings>
+        <arduino.upload.port>COM6</arduino.upload.port>
       </VisualMicroSettings>
     </VisualMicroSettings>
   </PropertyGroup>
@@ -223,8 +223,8 @@
     </ToolchainSettings>
     <VMSETTING_IncludePaths>C:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src;C:/Users/maazm/Documents/Arduino/libraries/RF24;C:/Users/maazm/Documents/Arduino/libraries/IMU_10DOF-master;C:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src;C:/Users/maazm/Documents/Arduino/libraries/IMU_10DOF-master/utility;C:/Users/maazm/Documents/Arduino/libraries/RF24/utility;C:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/SPI/src/utility;C:/Program Files (x86)/Arduino/libraries;C:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries;C:/Users/maazm/Documents/Arduino/libraries;C:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino;C:/Program Files (x86)/Arduino/hardware/arduino/avr/variants/mega;../../../Mega-code;C:/Program Files (x86)/Arduino/hardware/tools/avr/avr/include/;C:/Program Files (x86)/Arduino/hardware/tools/avr//avr/include/avr/;C:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/4.8.1/include;C:/Users/maazm/Documents/Arduino/libraries/Sparkfun_MPU_9250-1.0.0/src;C:/Users/maazm/Documents/Arduino/libraries/Sparkfun_MPU_9250-1.0.0/src/utility;C:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/Wire/src/utility;C:/Program Files (x86)/Atmel/Studio/7.0/Extensions/hy4wzpgl.exe/Micro Platforms/default/debuggers;</VMSETTING_IncludePaths>
     <VisualMicroSettings>
-      <VisualMicroSettings xmlns="">
-        <arduino.upload.port>COM4</arduino.upload.port>
+      <VisualMicroSettings>
+        <arduino.upload.port>COM6</arduino.upload.port>
       </VisualMicroSettings>
     </VisualMicroSettings>
   </PropertyGroup>
