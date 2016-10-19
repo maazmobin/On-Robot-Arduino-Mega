@@ -23,7 +23,7 @@ String IMU_data="";
 
                                     //BROADCAST IMU DATA After 50ms
 unsigned long prevIMUtime = 0;
-int IMUinterval = 100; //100ms
+int IMUinterval = 20; //100ms,20ms,10ms,... what ever
 
                                     //Declearing IMU
 
@@ -143,7 +143,8 @@ void broadcastIMU(void)
     IMU_data="";
   if(dataTurn==0)
   {
-    dataTurn++;
+    //dataTurn++;
+	dataTurn=0;
      myIMU.readAccelData(myIMU.accelCount);  // Read the x/y/z adc values
     myIMU.getAres();
     // Now we'll calculate the accleration value into actual g's
